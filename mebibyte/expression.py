@@ -7,9 +7,9 @@ class Expression:
     def __init__(self, expression: str) -> None:
         self.expression = expression
 
-    def tokenize(self) -> list[int]:
+    def tokenize(self) -> list[str]:
         tokens: list[str] = []
-        last_token: str = None
+        last_token: str = ""
 
         for t in self.expression.split():
             if Units.is_unit(t):
@@ -21,7 +21,7 @@ class Expression:
                     val = float(last_token)
                     val *= Units.bit_val(t)
                     tokens.append(str(val))
-                    last_token = None
+                    last_token = ""
                 except Exception as e:
                     raise ValueError(
                         f"Invalid expression: '{self.expression}'") from e
