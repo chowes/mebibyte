@@ -5,12 +5,12 @@ from .operator import OperatorFactory, Operator
 class Expression:
     expression: str
     tokens: list
-    postfix: list
+    postfix_tokens: list
 
     def __init__(self, expression: str) -> None:
         self.expression = expression
         self.tokens = []
-        self.postfix = []
+        self.postfix_tokens = []
 
     def tokenize(self) -> None:
         next_token = None
@@ -49,7 +49,14 @@ class Expression:
         operators: list[Operator] = []
 
         for t in self.tokens:
-            pass
+            if isinstance(t, Operator):
+                while operators and operators[-1] >= t:
+                    self.postfix_tokens.append(operators.pop())
+                operators.append(t)
+            elif isinstance(t, float):
+                self.postfix_tokens.append(t)
+            else:
+                raise ValueError(f"Invalid token: '{t}'")
 
-    def evaluate(self) -> float:
-        self.postfix()
+        while operators:
+            self.postfix_tokens.append(operators.pop())

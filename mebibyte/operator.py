@@ -10,6 +10,12 @@ class Operator(ABC):
     def __gt__(self, other):
         return self.precedence > other.precedence
 
+    def __le__(self, other):
+        return self.precedence <= other.precedence
+
+    def __ge__(self, other):
+        return self.precedence >= other.precedence
+
     def __eq__(self, other):
         return self.precedence == other.precedence
 
