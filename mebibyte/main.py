@@ -1,35 +1,66 @@
 import argparse
+import sys
+
+from .expression import Expression
 from .converter import ConverterFactory
+from .units import Units
+
+
+def split_expression(input: str) -> tuple[str, str]:
+    split = input.split("in")
+
+    if not split or len(split) > 2:
+        raise ValueError(f"Invalid expression: '{input}'")
+
+    expr = split[0]
+    if len(split) == 2:
+        unit = split[1].strip()
+        return expr, unit
+
+    for token in split[0].split():
+        if Units.is_unit(token):
+            unit = token
+            return expr, unit
+
+    return expr, "bit"
 
 
 def main():
     parser = argparse.ArgumentParser(
         prog='mebibyte', description='Convert between units of storage')
 
-    parser.add_argument('--from',
-                        dest='from_',
-                        type=str,
-                        required=True,
-                        help='unit to convert from')
-    parser.add_argument('--to',
-                        type=str,
-                        nargs='*',
-                        required=True,
-                        help='unit to convert to')
-    parser.add_argument('--value',
-                        default=1,
-                        type=float,
-                        help='value to convert')
+    parser.add_argument("expression",
+                        nargs=1,
+                        type=str)
 
     args = parser.parse_args()
-    from_unit = args.from_
-    to_units = args.to
 
-    cf = ConverterFactory()
-    for unit in to_units:
-        c = cf.get_converter(from_unit, unit)
-        v = c.convert(args.value)
-        print(f"{args.value} {from_unit}={v} {unit}")
+    if len(args.expression) != 1:
+        print("You must provide exactly one expression to evaluate.",
+              file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        expr, unit = split_expression(args.expression[0])
+    except ValueError:
+        print(
+            f"The expression '{args.expression[0]}' is not valid. Format: '<expression> in <output units>'",
+            file=sys.stderr)
+        sys.exit(1)
+
+    if not Units.is_unit(unit):
+        print(f"'{unit}' is not a valid unit.'", file=sys.stderr)
+        print("Supported units:", file=sys.stderr)
+        print(f"{', '.join(Units.unit_vals.keys())}", file=sys.stderr)
+        sys.exit(1)
+
+    expression = Expression(expr)
+    result = expression.evaluate()
+
+    converter = ConverterFactory.get_converter("bit", unit)
+    result = converter.convert(result)
+
+    print(f"{result} {unit}")
 
 
 if __name__ == "__main__":

@@ -60,3 +60,31 @@ class Expression:
 
         while operators:
             self.postfix_tokens.append(operators.pop())
+
+    def evaluate(self) -> float:
+        self.postfix()
+        operands: list[float] = []
+
+        if not self.postfix_tokens:
+            return 0.0
+
+        for t in self.postfix_tokens:
+            if isinstance(t, Operator):
+                try:
+                    r_operand = operands.pop()
+                    l_operand = operands.pop()
+                    result = t.compute(l_operand, r_operand)
+                    operands.append(result)
+                except IndexError:
+                    raise ValueError(
+                        f"Invalid expression: '{self.expression}'")
+            elif isinstance(t, float):
+                operands.append(t)
+            else:
+                raise ValueError(f"Invalid token: '{t}'")
+
+        if len(operands) != 1:
+            raise ValueError(
+                f"Invalid expression: '{self.expression}'")
+
+        return operands[0]

@@ -61,3 +61,17 @@ class TestExpression(unittest.TestCase):
         for tc in test_cases:
             e = Expression(tc["expression"])
             self.assertRaises(ValueError, e.postfix)
+
+    def test_evaluate(self):
+        test_cases = [
+            {"expression": "4 mib * 2 kib", "want": 549755813888.0},
+            {"expression": "4 + 2 * 8 + 4", "want": 24.0},
+            {"expression": "4 - 2 + 1 * 9 / 9 + 4 - 2", "want": 5.0},
+            {"expression": "", "want": 0.0},
+            {"expression": "4", "want": 4.0},
+        ]
+
+        for tc in test_cases:
+            e = Expression(tc["expression"])
+            result = e.evaluate()
+            self.assertAlmostEqual(result, tc["want"])

@@ -15,12 +15,14 @@ class Converter:
 
 
 class ConverterFactory:
-    def _bit_val(self, unit: str) -> int:
+    @staticmethod
+    def _bit_val(unit: str) -> int:
         unit = unit.lower()
         return Units.bit_val(unit)
 
-    def get_converter(self, from_unit: str, to_unit: str) -> Converter:
-        from_bit_val: int = self._bit_val(from_unit)
-        to_bit_val: int = self._bit_val(to_unit)
+    @staticmethod
+    def get_converter(from_unit: str, to_unit: str) -> Converter:
+        from_bit_val: int = ConverterFactory._bit_val(from_unit)
+        to_bit_val: int = ConverterFactory._bit_val(to_unit)
 
         return Converter(from_bit_val, to_bit_val)
