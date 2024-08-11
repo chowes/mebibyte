@@ -1,39 +1,55 @@
 from .units import Units
+from .operator import OperatorFactory, Operator
 
 
 class Expression:
     expression: str
+    tokens: list
+    postfix: list
 
     def __init__(self, expression: str) -> None:
         self.expression = expression
+        self.tokens = []
+        self.postfix = []
 
-    def tokenize(self) -> list[str]:
-        tokens: list[str] = []
-        last_token: str = ""
+    def tokenize(self) -> None:
+        next_token = None
+        last_token = None
 
         for t in self.expression.split():
             if Units.is_unit(t):
-                if not last_token:
+                if not last_token or not isinstance(last_token, float):
                     raise ValueError(
                         f"Invalid expression: '{self.expression}'")
 
+                last_token *= Units.bit_val(t)
+                self.tokens.append(last_token)
+                last_token = None
+                continue
+
+            elif OperatorFactory.is_operator(t):
+                next_token = OperatorFactory.new_operator(t)
+
+            else:
                 try:
-                    val = float(last_token)
-                    val *= Units.bit_val(t)
-                    tokens.append(str(val))
-                    last_token = ""
-                except Exception as e:
+                    next_token = float(t)
+                except ValueError as e:
                     raise ValueError(
                         f"Invalid expression: '{self.expression}'") from e
-            else:
-                if last_token:
-                    tokens.append(last_token)
-                last_token = t
+
+            if last_token:
+                self.tokens.append(last_token)
+            last_token = next_token
 
         if last_token:
-            tokens.append(last_token)
+            self.tokens.append(last_token)
 
-        return tokens
+    def postfix(self) -> None:
+        self.tokenize()
+        operators: list[Operator] = []
+
+        for t in self.tokens:
+            pass
 
     def evaluate(self) -> float:
-        tokens = self.tokenize()
+        self.postfix()
