@@ -59,6 +59,8 @@ def main():
 
     converter = ConverterFactory.get_converter("bit", unit)
     result = converter.convert(result)
+    if result.is_integer():
+        result = int(result)
 
     print(f"{result} {unit}")
 
