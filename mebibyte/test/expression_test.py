@@ -107,37 +107,49 @@ class TestExpression(unittest.TestCase):
         self.assertRaises(ValueError, e.tokenize)
 
     def test_postfix(self):
-        test_cases = [
-            {"expression": "4 mib * 2 kib",
-                "want": [33554432.0, 16384.0, Multiply()]},
-            {"expression": "4 + 2 * 8 + 4",
-                "want": [4.0, 2.0, 8.0, Multiply(), Add(), 4.0, Add()]},
-            {"expression": "4 - 2 + 1 * 9 / 9 + 4 - 2",
-                "want": [4.0, 2.0, Subtract(), 1.0, 9.0, Multiply(), 9.0, Divide(), Add(), 4.0, Add(), 2.0, Subtract()]},
-            {"expression": "",
-                "want": []},
-            {"expression": "4",
-                "want": [4.0]},
-        ]
+        e = Expression("4 mib")
+        e.postfix()
+        self.assertTokenListEqual(e.postfix_tokens, [Operand(4, "mib")])
 
-        for tc in test_cases:
-            e = Expression(tc["expression"])
-            e.postfix()
-            self.assertEqual(len(e.postfix_tokens), len(tc["want"]))
-            for got, want in zip(e.postfix_tokens, tc["want"]):
-                self.assertEqual(type(got), type(
-                    want), f'got: {e.postfix_tokens}, want: {tc["want"]}')
-                self.assertEqual(
-                    got, want, f'got: {e.postfix_tokens}, want: {tc["want"]}')
+        e = Expression("")
+        e.postfix()
+        self.assertTokenListEqual(e.postfix_tokens, [])
 
-    def test_postfix_error(self):
-        test_cases = [
-            {"expression": "foo"},
-        ]
+        e = Expression("4 mib * 2 kib")
+        e.postfix()
+        self.assertTokenListEqual(e.postfix_tokens,
+                                  [Operand(4, "mib"), Operand(2, "kib"), Multiply()])
 
-        for tc in test_cases:
-            e = Expression(tc["expression"])
-            self.assertRaises(ValueError, e.postfix)
+        e = Expression("4 + 2 * 8 + 4")
+        e.postfix()
+        self.assertTokenListEqual(e.postfix_tokens,
+                                  [Operand(4),
+                                   Operand(2),
+                                   Operand(8),
+                                   Multiply(),
+                                   Add(),
+                                   Operand(4),
+                                   Add()])
+
+        e = Expression("4 - 2 + 1 * 9 / 9 + 4 - 2")
+        e.postfix()
+        self.assertTokenListEqual(e.postfix_tokens,
+                                  [Operand(4),
+                                   Operand(2),
+                                   Subtract(),
+                                   Operand(1),
+                                   Operand(9),
+                                   Multiply(),
+                                   Operand(9),
+                                   Divide(),
+                                   Add(),
+                                   Operand(4),
+                                   Add(),
+                                   Operand(2),
+                                   Subtract()])
+
+        e = Expression("foo")
+        self.assertRaises(ValueError, e.postfix)
 
     def test_evaluate(self):
         e = Expression("4 mib * 2")
