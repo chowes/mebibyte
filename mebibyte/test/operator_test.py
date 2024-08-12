@@ -9,8 +9,8 @@ class TestOperator(unittest.TestCase):
         mult = Multiply()
         div = Divide()
 
-        self.assertEquals(add, sub)
-        self.assertEquals(mult, div)
+        self.assertEqual(add, sub)
+        self.assertEqual(mult, div)
         self.assertLess(add, mult)
         self.assertLess(sub, div)
 
