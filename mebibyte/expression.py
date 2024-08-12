@@ -13,6 +13,21 @@ class Expression:
         self.tokens = []
         self.postfix_tokens = []
 
+    def tokenize_operand(self, t: str) -> Operand:
+        try:
+            next_token = Operand(float(t))
+            return next_token
+        except ValueError:
+            pass
+
+        split = t.split("^")
+        if len(split) == 2:
+            base = float(split[0])
+            exp = float(split[1])
+            return Operand(base ** exp)
+
+        raise ValueError
+
     def tokenize(self) -> None:
         last_token = None
 
@@ -31,7 +46,7 @@ class Expression:
                 next_token = OperatorFactory.new_operator(t)
             else:
                 try:
-                    next_token = Operand(float(t))
+                    next_token = self.tokenize_operand(t)
                 except ValueError:
                     raise ValueError(
                         f"Token {t} is not a valid token.")

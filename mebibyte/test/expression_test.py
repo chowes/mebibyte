@@ -50,6 +50,10 @@ class TestExpression(unittest.TestCase):
         e.tokenize()
         self.assertTokenListEqual(e.tokens, [Operand(4.0, "mib")])
 
+        e = Expression("2^30 bytes")
+        e.tokenize()
+        self.assertTokenListEqual(e.tokens, [Operand(1, "gib")])
+
         e = Expression("4 mib * 2 / 8 + 16")
         e.tokenize()
         self.assertTokenListEqual(
@@ -104,6 +108,9 @@ class TestExpression(unittest.TestCase):
         self.assertRaises(ValueError, e.tokenize)
 
         e = Expression("4 mib * foo kib")
+        self.assertRaises(ValueError, e.tokenize)
+
+        e = Expression("2^^30 bytes")
         self.assertRaises(ValueError, e.tokenize)
 
     def test_postfix(self):
