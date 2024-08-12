@@ -1,5 +1,7 @@
+import re
+
 from .units import Units
-from .operator import OperatorFactory, Operator
+from .operator import OperatorFactory, Operator, LeftParen, RightParen
 from .operand import Operand
 
 
@@ -12,6 +14,11 @@ class Expression:
         self.expression = expression
         self.tokens = []
         self.postfix_tokens = []
+
+    def split_tokens(self) -> list[str]:
+        expr = self.expression.replace("(", "( ").replace(")", " )")
+        tokens = expr.split()
+        return tokens
 
     def tokenize_operand(self, t: str) -> Operand:
         try:
@@ -31,7 +38,8 @@ class Expression:
     def tokenize(self) -> None:
         last_token = None
 
-        for t in self.expression.split():
+        tokens = self.split_tokens()
+        for t in tokens:
             next_token = None
             if Units.is_unit(t):
                 try:
@@ -63,8 +71,20 @@ class Expression:
         operators: list[Operator] = []
 
         for t in self.tokens:
-            if isinstance(t, Operator):
+            if isinstance(t, LeftParen):
+                operators.append(t)
+            elif isinstance(t, RightParen):
+                while operators:
+                    next_op = operators.pop()
+                    if isinstance(next_op, LeftParen):
+                        break
+                    self.postfix_tokens.append(next_op)
+                else:
+                    raise ValueError(f"Mismatched parentheses ')'")
+            elif isinstance(t, Operator):
                 while operators and operators[-1] >= t:
+                    if isinstance(operators[-1], LeftParen):
+                        break
                     self.postfix_tokens.append(operators.pop())
                 operators.append(t)
             elif isinstance(t, Operand):
@@ -73,7 +93,10 @@ class Expression:
                 raise ValueError(f"Invalid token: '{t}'")
 
         while operators:
-            self.postfix_tokens.append(operators.pop())
+            next_op = operators.pop()
+            if isinstance(next_op, LeftParen):
+                raise ValueError(f"Mismatched parentheses '('")
+            self.postfix_tokens.append(next_op)
 
     def evaluate(self) -> Operand:
         self.postfix()

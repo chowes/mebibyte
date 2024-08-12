@@ -1,6 +1,6 @@
 import unittest
 from ..expression import Expression
-from ..operator import Add, Multiply, Divide, Subtract, Operator
+from ..operator import LeftParen, RightParen, Add, Multiply, Divide, Subtract, Operator
 from ..operand import Operand
 
 
@@ -40,6 +40,11 @@ class TestExpression(unittest.TestCase):
         e.tokenize()
         self.assertTokenListEqual(
             e.tokens, [Operand(4.0), Add(), Operand(2.0)])
+
+        e = Expression("(4 + 2)")
+        e.tokenize()
+        self.assertTokenListEqual(
+            e.tokens, [LeftParen(), Operand(4.0), Add(), Operand(2.0), RightParen()])
 
         e = Expression("4 mib / 8 mib")
         e.tokenize()
@@ -155,7 +160,30 @@ class TestExpression(unittest.TestCase):
                                    Operand(2),
                                    Subtract()])
 
+        e = Expression("(2^30 bytes + 4 gib) / (2 * 2 gib)")
+        e.postfix()
+        self.assertTokenListEqual(e.postfix_tokens, [
+            Operand(1, "gib"),
+            Operand(4, "gib"),
+            Add(),
+            Operand(2),
+            Operand(2, "gib"),
+            Multiply(),
+            Divide()])
+
         e = Expression("foo")
+        self.assertRaises(ValueError, e.postfix)
+
+        e = Expression(")(")
+        self.assertRaises(ValueError, e.postfix)
+
+        e = Expression("(()")
+        self.assertRaises(ValueError, e.postfix)
+
+        e = Expression("(1 + (2)")
+        self.assertRaises(ValueError, e.postfix)
+
+        e = Expression("(1 + (2))(")
         self.assertRaises(ValueError, e.postfix)
 
     def test_evaluate(self):
@@ -198,6 +226,10 @@ class TestExpression(unittest.TestCase):
         e = Expression("0 mib / 1")
         result = e.evaluate()
         self.assertOperandsEqual(result, Operand(0, "mib"))
+
+        e = Expression("(2^30 bytes + 4 gib) / (2 * 2 gib)")
+        result = e.evaluate()
+        self.assertOperandsEqual(result, Operand(1.25))
 
         e = Expression("4 foo")
         self.assertRaises(ValueError, e.evaluate)

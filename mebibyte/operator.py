@@ -20,6 +20,9 @@ class Operator(ABC):
     def __eq__(self, other):
         return self.precedence == other.precedence
 
+    def __repr__(self):
+        return self.__class__.__name__
+
     @abstractmethod
     def compute(self, l_operand: Operand, r_operand: Operand) -> float:
         pass
@@ -53,8 +56,22 @@ class Divide(Operator):
         return l_operand / r_operand
 
 
+class LeftParen(Operator):
+    precedence: int = 3
+
+    def compute(self, l_operand: Operand = None, r_operand: Operand = None) -> Operand:
+        raise TypeError
+
+
+class RightParen(Operator):
+    precedence: int = 3
+
+    def compute(self, l_operand: Operand = None, r_operand: Operand = None) -> Operand:
+        raise TypeError
+
+
 class OperatorFactory:
-    valid = set(["+", "-", "*", "/"])
+    valid = set(["+", "-", "*", "/", "(", ")"])
 
     @staticmethod
     def is_operator(operator: str) -> bool:
@@ -71,5 +88,9 @@ class OperatorFactory:
                 return Multiply()
             case "/":
                 return Divide()
+            case "(":
+                return LeftParen()
+            case ")":
+                return RightParen()
             case _:
                 raise ValueError(f"{operator} is not a valid operator")
