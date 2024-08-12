@@ -9,20 +9,17 @@ from .units import Units
 def split_expression(input: str) -> tuple[str, str]:
     split = input.split("in")
 
-    if not split or len(split) > 2:
-        raise ValueError(f"Invalid expression: '{input}'")
+    if not split:
+        raise ValueError(f"Expression '{input}' is malformed.")
+    if len(split) > 2:
+        raise ValueError(f"Expression '{input}' has multiple 'in' directives.")
 
     expr = split[0]
-    if len(split) == 2:
-        unit = split[1].strip()
-        return expr, unit
+    if len(split) == 1:
+        return expr, None
 
-    for token in split[0].split():
-        if Units.is_unit(token):
-            unit = token
-            return expr, unit
-
-    return expr, "bit"
+    unit = split[1].strip()
+    return expr, unit
 
 
 def main():
@@ -48,21 +45,43 @@ def main():
             file=sys.stderr)
         sys.exit(1)
 
-    if not Units.is_unit(unit):
+    if unit and not Units.is_unit(unit):
         print(f"'{unit}' is not a valid unit.'", file=sys.stderr)
         print("Supported units:", file=sys.stderr)
         print(f"{', '.join(Units.unit_vals.keys())}", file=sys.stderr)
         sys.exit(1)
 
     expression = Expression(expr)
-    result = expression.evaluate()
+    try:
+        result = expression.evaluate()
+    except ValueError as e:
+        print(f"Expression '{expr}' is not valid: {e}", file=sys.stderr)
+        sys.exit(1)
 
-    converter = ConverterFactory.get_converter("bit", unit)
-    result = converter.convert(result)
-    if result.is_integer():
-        result = int(result)
+    if result.unit_power > 0:
+        if not unit:
+            unit = "bit"
+            for token in expr.split():
+                if Units.is_unit(token):
+                    unit = token
+                    break
 
-    print(f"{result} {unit}")
+        converter = ConverterFactory.get_converter("bit", unit)
+        val = converter.convert(result.value)
+    else:
+        if unit:
+            print(
+                f"Cannot convert dimensionless result '{result.value}' to '{unit}'.'", file=sys.stderr)
+            sys.exit(1)
+        val = result.value
+
+    if val.is_integer():
+        val = int(val)
+
+    if unit:
+        print(f"{val} {unit}")
+    else:
+        print(f"{val}")
 
 
 if __name__ == "__main__":

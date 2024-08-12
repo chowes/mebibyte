@@ -1,5 +1,6 @@
 from .units import Units
 from .operator import OperatorFactory, Operator
+from .operand import Operand
 
 
 class Expression:
@@ -13,29 +14,27 @@ class Expression:
         self.postfix_tokens = []
 
     def tokenize(self) -> None:
-        next_token = None
         last_token = None
 
         for t in self.expression.split():
+            next_token = None
             if Units.is_unit(t):
-                if not last_token or not isinstance(last_token, float):
+                try:
+                    last_token *= Operand(1, t)
+                    self.tokens.append(last_token)
+                    last_token = None
+                except (ValueError, TypeError) as e:
                     raise ValueError(
-                        f"Invalid expression: '{self.expression}'")
-
-                last_token *= Units.bit_val(t)
-                self.tokens.append(last_token)
-                last_token = None
+                        f"Unit {t} associated with non-scalar {last_token}") from e
                 continue
-
             elif OperatorFactory.is_operator(t):
                 next_token = OperatorFactory.new_operator(t)
-
             else:
                 try:
-                    next_token = float(t)
-                except ValueError as e:
+                    next_token = Operand(float(t))
+                except ValueError:
                     raise ValueError(
-                        f"Invalid expression: '{self.expression}'") from e
+                        f"Token {t} is not a valid token.")
 
             if last_token:
                 self.tokens.append(last_token)
@@ -53,7 +52,7 @@ class Expression:
                 while operators and operators[-1] >= t:
                     self.postfix_tokens.append(operators.pop())
                 operators.append(t)
-            elif isinstance(t, float):
+            elif isinstance(t, Operand):
                 self.postfix_tokens.append(t)
             else:
                 raise ValueError(f"Invalid token: '{t}'")
@@ -61,12 +60,12 @@ class Expression:
         while operators:
             self.postfix_tokens.append(operators.pop())
 
-    def evaluate(self) -> float:
+    def evaluate(self) -> Operand:
         self.postfix()
-        operands: list[float] = []
+        operands: list[Operand] = []
 
         if not self.postfix_tokens:
-            return 0.0
+            return Operand(0.0)
 
         for t in self.postfix_tokens:
             if isinstance(t, Operator):
@@ -77,14 +76,17 @@ class Expression:
                     operands.append(result)
                 except IndexError:
                     raise ValueError(
-                        f"Invalid expression: '{self.expression}'")
-            elif isinstance(t, float):
+                        f"Malformed expression.")
+                except ZeroDivisionError:
+                    raise ValueError(
+                        f"Evaluating expression results in zero divsion.")
+            elif isinstance(t, Operand):
                 operands.append(t)
             else:
                 raise ValueError(f"Invalid token: '{t}'")
 
         if len(operands) != 1:
             raise ValueError(
-                f"Invalid expression: '{self.expression}'")
+                f"Malformed expression.")
 
         return operands[0]

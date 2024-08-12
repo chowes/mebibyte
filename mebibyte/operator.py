@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from .operand import Operand
 
 
 class Operator(ABC):
@@ -20,35 +21,35 @@ class Operator(ABC):
         return self.precedence == other.precedence
 
     @abstractmethod
-    def compute(self, l_operand: float, r_operand: float) -> float:
+    def compute(self, l_operand: Operand, r_operand: Operand) -> float:
         pass
 
 
 class Add(Operator):
     precedence: int = 0
 
-    def compute(self, l_operand: float, r_operand: float) -> float:
+    def compute(self, l_operand: Operand, r_operand: Operand) -> Operand:
         return l_operand + r_operand
 
 
 class Subtract(Operator):
     precedence: int = 0
 
-    def compute(self, l_operand: float, r_operand: float) -> float:
+    def compute(self, l_operand: Operand, r_operand: Operand) -> Operand:
         return l_operand - r_operand
 
 
 class Multiply(Operator):
     precedence: int = 1
 
-    def compute(self, l_operand: float, r_operand: float) -> float:
+    def compute(self, l_operand: Operand, r_operand: Operand) -> Operand:
         return l_operand * r_operand
 
 
 class Divide(Operator):
     precedence: int = 1
 
-    def compute(self, l_operand: float, r_operand: float) -> float:
+    def compute(self, l_operand: Operand, r_operand: Operand) -> Operand:
         return l_operand / r_operand
 
 
