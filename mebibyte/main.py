@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from .units import Units
-from .handler import InputHandler, MalformedExpressionError, InvalidUnitError
+from .handler import ExpressionHandler, MalformedExpressionError, InvalidUnitError
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
         sys.exit(1)
     expression = args.expression[0]
 
-    handler = InputHandler(expression)
+    handler = ExpressionHandler(expression)
     try:
         value, unit = handler.handle()
     except InvalidUnitError as e:

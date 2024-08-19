@@ -12,14 +12,12 @@ class InvalidUnitError(MalformedExpressionError):
     pass
 
 
-class InputHandler:
-    input_string: str
+class ExpressionHandler:
+    def __init__(self):
+        pass
 
-    def __init__(self, input_string):
-        self.input_string = input_string
-
-    def handle(self) -> float:
-        expr, unit = self.split_expression(self.input_string)
+    def handle(self, input_string) -> float:
+        expr, unit = self.split_expression(input_string)
         if unit and not Units.is_unit(unit):
             raise InvalidUnitError(
                 f"'{unit}' is not a valid unit.")
