@@ -72,10 +72,25 @@ class Units:
 
     @staticmethod
     def bit_val(unit: str) -> int:
-        if unit not in Units.unit_vals:
-            raise ValueError(f"Invalid unit type: '{unit}'")
+        if not Units.is_unit(unit):
+            raise ValueError(f"Invalid unit: '{unit}'")
         return Units.unit_vals[unit]
 
     @staticmethod
     def is_unit(unit: str) -> int:
         return unit in Units.unit_vals
+
+    @staticmethod
+    def prettify(unit: str) -> str:
+        if not Units.is_unit(unit):
+            raise ValueError(f"Invalid unit: '{unit}'")
+
+        if unit == "b" or unit == "bit":
+            return unit
+        if len(unit) > 3:
+            return unit
+
+        result = unit[0].upper() + unit[1:]
+        result = result[0:-1] + result[-1].upper()
+
+        return result

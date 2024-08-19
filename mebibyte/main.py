@@ -21,9 +21,9 @@ def main():
         sys.exit(1)
     expression = args.expression[0]
 
-    handler = ExpressionHandler(expression)
+    handler = ExpressionHandler()
     try:
-        value, unit = handler.handle()
+        value, unit = handler.handle(expression)
     except InvalidUnitError as e:
         print(f"{e}", file=sys.stderr)
         print("Supported units:", file=sys.stderr)

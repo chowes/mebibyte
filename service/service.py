@@ -18,7 +18,8 @@ class MebibyteService:
         self.setup_routes()
 
     def setup_routes(self) -> None:
-        self.app.add_url_rule("/expression", view_func=self.expression, methods=['POST'])
+        self.app.add_url_rule(
+            "/expression", view_func=self.expression, methods=['POST'])
 
     def start(self) -> None:
         self.app.run(
@@ -32,7 +33,7 @@ class MebibyteService:
 
         if not unit:
             return f"{value}"
-        
+
         return f"{value} {unit}"
 
     def expression(self) -> Response:

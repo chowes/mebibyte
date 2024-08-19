@@ -16,7 +16,8 @@ class ExpressionHandler:
     def __init__(self):
         pass
 
-    def handle(self, input_string) -> float:
+    def handle(self, input_string: str) -> float:
+        input_string = input_string.lower()
         expr, unit = self.split_expression(input_string)
         if unit and not Units.is_unit(unit):
             raise InvalidUnitError(
@@ -71,5 +72,8 @@ class ExpressionHandler:
                 raise MalformedExpressionError(
                     f"Cannot convert dimensionless result '{result.value}' to '{unit}'.")
             val = result.value
+
+        if unit:
+            unit = Units.prettify(unit)
 
         return val, unit

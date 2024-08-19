@@ -13,12 +13,12 @@ class TestExpressionHandler(unittest.TestCase):
         h = ExpressionHandler()
         result, unit = h.handle("2 mib + 2048 kib in mib")
         self.assertAlmostEqual(result, 4)
-        self.assertEqual(unit, "mib")
+        self.assertEqual(unit, "MiB")
 
         h = ExpressionHandler()
         result, unit = h.handle("2 mib + 2048 kib")
         self.assertAlmostEqual(result, 4)
-        self.assertEqual(unit, "mib")
+        self.assertEqual(unit, "MiB")
 
         h = ExpressionHandler()
         result, unit = h.handle("2 + 3")
