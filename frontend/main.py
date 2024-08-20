@@ -83,7 +83,7 @@ class MebibyteApp:
     def sidebar(self):
         with st.sidebar:
             st.markdown(
-                """
+                f"""
                 ### Examples:
                 - `1 MiB in bytes`
                 - `2^30 bytes in MiB`
@@ -99,18 +99,14 @@ class MebibyteApp:
                 - Reciprocals (`1 / 2 MiB`)
                 - Mixed units (`1 KB + 1`)
 
-                ### Units:
+                ### Supported units:
                 - Bit-based units (`gigabits`)
                 - Byte-based units (`gigabytes`)
                 - Binary prefix units up to `exbibytes`
                 - Decimal prefix units up to `exabytes`
                 - Shorthand for byte-based units (`GiB`)
                 - Units are not case sensitive
-                """
-            )
 
-            st.html(
-                f"""
                 <style>
                 .resizable-image {{
                     height: 1.5em;
@@ -121,6 +117,7 @@ class MebibyteApp:
                     <img src="{github_logo_path}" class="resizable-image">
                 </a>
                 """,
+                unsafe_allow_html=True,
             )
 
     def run(self):
